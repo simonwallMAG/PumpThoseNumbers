@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler
@@ -10,6 +11,10 @@ public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
     [SerializeField] private Color m_pressedColour = Color.black;
     [SerializeField] private Color m_textUnpressedColour = Color.black;
     [SerializeField] private Color m_textPressedColour = Color.white;
+
+    private PlayableDirector m_tileDirector;
+
+    private Vector2 m_gridPos = new Vector2();
 
     private Text m_myNumberText;
     private int m_myNumber;
@@ -44,8 +49,19 @@ public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
         get { return m_myNumber; }
     }
 
-    public void Init()
+    public Vector2 GridPos
     {
+        get { return m_gridPos; }
+    }
+
+    public PlayableDirector TileDirector
+    {
+        get { return m_tileDirector; }
+    }
+
+    public void Init(Vector2 gridPos)
+    {
+        m_tileDirector = GetComponent<PlayableDirector>();
         m_boardManager = GetComponentInParent<BoardManager>();
         m_buttonImage = GetComponent<Image>();
         m_myNumberText = GetComponentInChildren<Text>();
@@ -54,6 +70,7 @@ public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
 
         m_buttonImage.color = m_unpressedColour;
         m_myNumberText.color = m_textUnpressedColour;
+        m_gridPos = gridPos;
     }
 
     public void GenerateNewNumber()
@@ -68,9 +85,12 @@ public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
         {
             if (!Down)
             {
-                if (Input.GetMouseButton(0))
-                {
-                    Down = true;
+                if (m_boardManager.CanBePressed(GridPos))
+                { 
+                    if (Input.GetMouseButton(0))
+                    {
+                        Down = true;
+                    }
                 }
             }
         }
@@ -82,7 +102,10 @@ public class NumberTile : MonoBehaviour, IPointerEnterHandler, IPointerDownHandl
         {
             if (!Down)
             {
-                Down = true;
+                if (m_boardManager.CanBePressed(GridPos))
+                {
+                    Down = true;
+                }
             }
         }
     }
